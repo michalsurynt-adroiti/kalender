@@ -26,17 +26,17 @@ class MonthGrid extends StatelessWidget {
               ),
           ],
         ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (int i = 0; i < 6; i++)
-              Divider(
-                height: thickness,
-                thickness: thickness,
-                color: color,
-              ),
-          ],
-        ),
+        // Column(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     for (int i = 0; i < 6; i++)
+        //       Divider(
+        //         height: thickness,
+        //         thickness: thickness,
+        //         color: color,
+        //       ),
+        //   ],
+        // ),
       ],
     );
   }

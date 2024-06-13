@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:kalender/kalender.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,8 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
       end: DateTime(DateTime.now().year + 1),
     ),
   );
-  final CalendarEventsController<Event> eventController =
-      CalendarEventsController<Event>();
+  final CalendarEventsController<Event> eventController = CalendarEventsController<Event>();
 
   late ViewConfiguration currentConfiguration = viewConfigurations[0];
   List<ViewConfiguration> viewConfigurations = [
@@ -62,7 +62,13 @@ class _MyHomePageState extends State<MyHomePage> {
     ),
     WeekConfiguration(),
     WorkWeekConfiguration(),
-    MonthConfiguration(),
+    MonthConfiguration(
+      createMultiDayEvents: false,
+      enableRescheduling: false,
+      enableResizing: false,
+      createEventTrigger: null,
+      multiDayTileHeight: 100,
+    ),
     ScheduleConfiguration(),
     MultiWeekConfiguration(
       numberOfWeeks: 3,
@@ -91,8 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
       CalendarEvent(
         dateTimeRange: DateTimeRange(
           start: DateTime(now.year, now.month, now.day),
-          end: DateTime(now.year, now.month, now.day)
-              .add(const Duration(days: 2)),
+          end: DateTime(now.year, now.month, now.day).add(const Duration(days: 2)),
         ),
         eventData: Event(title: 'Event 3'),
       ),
@@ -109,14 +114,25 @@ class _MyHomePageState extends State<MyHomePage> {
       multiDayTileBuilder: _multiDayTileBuilder,
       scheduleTileBuilder: _scheduleTileBuilder,
       components: CalendarComponents(
-        calendarHeaderBuilder: _calendarHeader,
+        calendarHeaderBuilder: (range) => _calendarHeader(range, controller.visibleMonth!),
+        monthCellHeaderBuilder: (date, onTapped) {
+          if (controller.visibleMonth case final month?) {
+            if (month.month == date.month && month.year == date.year) {
+              return Text(
+                date.day.toString(),
+                style: const TextStyle(color: Colors.yellow),
+              );
+            }
+          }
+          return Text(
+            date.day.toString(),
+            style: TextStyle(color: Colors.pink.shade100),
+          );
+        },
       ),
-      eventHandlers: CalendarEventHandlers(
-        onEventTapped: _onEventTapped,
-        onEventChanged: _onEventChanged,
-        onCreateEvent: _onCreateEvent,
-        onEventCreated: _onEventCreated,
-      ),
+      eventHandlers: const CalendarEventHandlers(
+          // onEventTapped: _onEventTapped,
+          ),
     );
 
     return SafeArea(
@@ -147,9 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
     CalendarEvent<Event> event,
   ) async {
     if (isMobile) {
-      eventController.selectedEvent == event
-          ? eventController.deselectEvent()
-          : eventController.selectEvent(event);
+      eventController.selectedEvent == event ? eventController.deselectEvent() : eventController.selectEvent(event);
     }
   }
 
@@ -173,13 +187,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       margin: EdgeInsets.zero,
       elevation: configuration.tileType == TileType.ghost ? 0 : 8,
-      color: configuration.tileType != TileType.ghost
-          ? color
-          : color.withAlpha(100),
+      color: configuration.tileType != TileType.ghost ? color : color.withAlpha(100),
       child: Center(
-        child: configuration.tileType != TileType.ghost
-            ? Text(event.eventData?.title ?? 'New Event')
-            : null,
+        child: configuration.tileType != TileType.ghost ? Text(event.eventData?.title ?? 'New Event') : null,
       ),
     );
   }
@@ -192,13 +202,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 2),
       elevation: configuration.tileType == TileType.selected ? 8 : 0,
-      color: configuration.tileType == TileType.ghost
-          ? color.withAlpha(100)
-          : color,
+      color: configuration.tileType == TileType.ghost ? color.withAlpha(100) : color,
       child: Center(
-        child: configuration.tileType != TileType.ghost
-            ? Text(event.eventData?.title ?? 'New Event')
-            : null,
+        child: configuration.tileType != TileType.ghost ? Text(event.eventData?.title ?? 'New Event') : null,
       ),
     );
   }
@@ -213,9 +219,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _calendarHeader(DateTimeRange dateTimeRange) {
+  Widget _calendarHeader(DateTimeRange dateTimeRange, DateTime visibleMonth) {
     return Row(
       children: [
+        Text(
+          DateFormat('yyyy - MMMM').format(visibleMonth),
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const Spacer(),
         DropdownMenu(
           onSelected: (value) {
             if (value == null) return;
@@ -224,21 +235,29 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           },
           initialSelection: currentConfiguration,
-          dropdownMenuEntries: viewConfigurations
-              .map((e) => DropdownMenuEntry(value: e, label: e.name))
-              .toList(),
+          dropdownMenuEntries: viewConfigurations.map((e) => DropdownMenuEntry(value: e, label: e.name)).toList(),
         ),
         IconButton.filledTonal(
-          onPressed: controller.animateToPreviousPage,
+          onPressed: () {
+            controller.animateToPreviousPage().then((_) {
+              setState(() {});
+            });
+          },
           icon: const Icon(Icons.navigate_before_rounded),
         ),
         IconButton.filledTonal(
-          onPressed: controller.animateToNextPage,
+          onPressed: () {
+            controller.animateToNextPage().then((_) {
+              setState(() {});
+            });
+          },
           icon: const Icon(Icons.navigate_next_rounded),
         ),
         IconButton.filledTonal(
           onPressed: () {
-            controller.animateToDate(DateTime.now());
+            setState(() {
+              controller.animateToDate(DateTime.now());
+            });
           },
           icon: const Icon(Icons.today),
         ),

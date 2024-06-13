@@ -30,6 +30,7 @@ class MonthViewPageContent<T> extends StatelessWidget {
     final components = CalendarStyleProvider.of(context).components;
 
     return Stack(
+      clipBehavior: Clip.hardEdge,
       children: <Widget>[
         components.monthGridBuilder(),
         ListenableBuilder(
@@ -41,6 +42,9 @@ class MonthViewPageContent<T> extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       // Calculate the start date.
+                      final isFirstWeek = c == 0;
+                      //controller.visibleMonth
+
                       final start = visibleDateRange.start.add(
                         Duration(days: c * 7),
                       );
@@ -57,38 +61,32 @@ class MonthViewPageContent<T> extends StatelessWidget {
                       );
 
                       // Get the events from the events controller.
-                      final events =
-                          scope.eventsController.getEventsFromDateRange(
+                      final events = scope.eventsController.getEventsFromDateRange(
                         weekDateRange,
                       );
 
-                      controller.visibleEvents =
-                          controller.visibleEvents.followedBy(events);
+                      controller.visibleEvents = controller.visibleEvents.followedBy(events);
 
                       // Create a multi day event group from the events.
                       final multiDayEventGroup = MultiDayEventGroup.fromEvents(
                         events: events,
                       );
 
-                      final selectedEvent =
-                          scope.eventsController.selectedEvent;
-                      final horizontalStepDuration =
-                          viewConfiguration.horizontalStepDuration;
-                      final verticalStepDuration =
-                          viewConfiguration.verticalStepDuration;
-                      final multiDayTileHeight =
-                          viewConfiguration.multiDayTileHeight;
+                      final selectedEvent = scope.eventsController.selectedEvent;
+                      final horizontalStepDuration = viewConfiguration.horizontalStepDuration;
+                      final verticalStepDuration = viewConfiguration.verticalStepDuration;
+                      final multiDayTileHeight = viewConfiguration.multiDayTileHeight;
 
                       // Calculate the height of the multi day event group.
-                      final height = multiDayTileHeight *
-                          (multiDayEventGroup.maxNumberOfStackedEvents +
-                              (viewConfiguration.createMultiDayEvents ? 1 : 0));
+                      var height = multiDayTileHeight * (multiDayEventGroup.maxNumberOfStackedEvents + (viewConfiguration.createMultiDayEvents ? 1 : 0));
+                      if (events.isEmpty) {
+                        // No events in a given week.
+                        height = 40;
+                      }
 
                       final gestureDetector = MultiDayHeaderGestureDetector<T>(
-                        createMultiDayEvents:
-                            viewConfiguration.createMultiDayEvents,
-                        createEventTrigger:
-                            viewConfiguration.createEventTrigger,
+                        createMultiDayEvents: viewConfiguration.createMultiDayEvents,
+                        createEventTrigger: viewConfiguration.createEventTrigger,
                         visibleDateRange: weekDateRange,
                         horizontalStep: horizontalStep,
                         verticalStep: verticalStep,
@@ -114,24 +112,20 @@ class MonthViewPageContent<T> extends StatelessWidget {
                               visibleDateRange.start.add(
                                 Duration(days: (c * 7) + r),
                               ),
-                              (date) =>
-                                  scope.functions.onDateTapped?.call(date),
+                              (date) => scope.functions.onDateTapped?.call(date),
                             ),
                         ],
                       );
 
                       ListenableBuilder? changingEvent;
-                      if (selectedEvent != null &&
-                          scope.eventsController.hasChangingEvent) {
+                      if (selectedEvent != null && scope.eventsController.hasChangingEvent) {
                         changingEvent = ListenableBuilder(
                           listenable: scope.eventsController.selectedEvent!,
                           builder: (context, child) {
-                            final occursDuring = selectedEvent
-                                .occursDuringDateTimeRange(weekDateRange);
+                            final occursDuring = selectedEvent.occursDuringDateTimeRange(weekDateRange);
 
                             if (occursDuring) {
-                              final multiDayEventGroup =
-                                  MultiDayEventGroup.fromEvents(
+                              final multiDayEventGroup = MultiDayEventGroup.fromEvents(
                                 events: [selectedEvent],
                               );
 
@@ -153,22 +147,27 @@ class MonthViewPageContent<T> extends StatelessWidget {
                         );
                       }
 
-                      return Expanded(
+                      final style = CalendarStyleProvider.of(context).style.monthGridStyle;
+                      final color = style.color ?? Colors.white10;
+
+                      return DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: isFirstWeek ? BorderSide(color: color) : BorderSide.none,
+                            bottom: BorderSide(color: color),
+                          ),
+                        ),
                         child: Column(
                           children: [
                             cellHeaders,
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: SizedBox(
-                                  height: height,
-                                  child: Stack(
-                                    children: [
-                                      gestureDetector,
-                                      eventGroup,
-                                      changingEvent ?? const SizedBox.shrink(),
-                                    ],
-                                  ),
-                                ),
+                            SizedBox(
+                              height: height,
+                              child: Stack(
+                                children: [
+                                  gestureDetector,
+                                  eventGroup,
+                                  changingEvent ?? const SizedBox.shrink(),
+                                ],
                               ),
                             ),
                           ],
