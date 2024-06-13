@@ -111,6 +111,9 @@ class _MyHomePageState extends State<MyHomePage> {
       eventsController: eventController,
       viewConfiguration: currentConfiguration,
       tileBuilder: _tileBuilder,
+      style: const CalendarStyle(
+        backgroundColor: Colors.pink,
+      ),
       multiDayTileBuilder: _multiDayTileBuilder,
       scheduleTileBuilder: _scheduleTileBuilder,
       components: CalendarComponents(

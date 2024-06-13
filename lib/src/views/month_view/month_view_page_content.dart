@@ -32,150 +32,159 @@ class MonthViewPageContent<T> extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.hardEdge,
       children: <Widget>[
-        components.monthGridBuilder(),
         ListenableBuilder(
           listenable: scope.eventsController,
           builder: (context, child) {
-            return Column(
-              children: [
-                for (int c = 0; c < 5; c++)
-                  Builder(
-                    builder: (context) {
-                      // Calculate the start date.
-                      final isFirstWeek = c == 0;
-                      //controller.visibleMonth
+            return IntrinsicHeight(
+              child: SizedBox(
+                child: Stack(
+                  children: [
+                    components.monthGridBuilder(),
+                    Column(
+                      children: [
+                        for (int c = 0; c < 5; c++)
+                          Builder(
+                            builder: (context) {
+                              // Calculate the start date.
+                              final isFirstWeek = c == 0;
+                              //controller.visibleMonth
 
-                      final start = visibleDateRange.start.add(
-                        Duration(days: c * 7),
-                      );
-
-                      // Calculate the end date.
-                      final end = visibleDateRange.start.add(
-                        Duration(days: (c * 7) + 7),
-                      );
-
-                      // Create a date range from the start and end dates.
-                      final weekDateRange = DateTimeRange(
-                        start: start.startOfDay,
-                        end: end.startOfDay,
-                      );
-
-                      // Get the events from the events controller.
-                      final events = scope.eventsController.getEventsFromDateRange(
-                        weekDateRange,
-                      );
-
-                      controller.visibleEvents = controller.visibleEvents.followedBy(events);
-
-                      // Create a multi day event group from the events.
-                      final multiDayEventGroup = MultiDayEventGroup.fromEvents(
-                        events: events,
-                      );
-
-                      final selectedEvent = scope.eventsController.selectedEvent;
-                      final horizontalStepDuration = viewConfiguration.horizontalStepDuration;
-                      final verticalStepDuration = viewConfiguration.verticalStepDuration;
-                      final multiDayTileHeight = viewConfiguration.multiDayTileHeight;
-
-                      // Calculate the height of the multi day event group.
-                      var height = multiDayTileHeight * (multiDayEventGroup.maxNumberOfStackedEvents + (viewConfiguration.createMultiDayEvents ? 1 : 0));
-                      if (events.isEmpty) {
-                        // No events in a given week.
-                        height = 40;
-                      }
-
-                      final gestureDetector = MultiDayHeaderGestureDetector<T>(
-                        createMultiDayEvents: viewConfiguration.createMultiDayEvents,
-                        createEventTrigger: viewConfiguration.createEventTrigger,
-                        visibleDateRange: weekDateRange,
-                        horizontalStep: horizontalStep,
-                        verticalStep: verticalStep,
-                      );
-
-                      final eventGroup = MultiDayEventGroupWidget<T>(
-                        multiDayEventGroup: multiDayEventGroup,
-                        visibleDateRange: weekDateRange,
-                        horizontalStep: horizontalStep,
-                        horizontalStepDuration: horizontalStepDuration,
-                        verticalStep: verticalStep,
-                        verticalStepDuration: verticalStepDuration,
-                        isChanging: false,
-                        multiDayTileHeight: multiDayTileHeight,
-                        rescheduleDateRange: visibleDateRange,
-                      );
-
-                      final cellHeaders = Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          for (int r = 0; r < 7; r++)
-                            components.monthCellHeaderBuilder(
-                              visibleDateRange.start.add(
-                                Duration(days: (c * 7) + r),
-                              ),
-                              (date) => scope.functions.onDateTapped?.call(date),
-                            ),
-                        ],
-                      );
-
-                      ListenableBuilder? changingEvent;
-                      if (selectedEvent != null && scope.eventsController.hasChangingEvent) {
-                        changingEvent = ListenableBuilder(
-                          listenable: scope.eventsController.selectedEvent!,
-                          builder: (context, child) {
-                            final occursDuring = selectedEvent.occursDuringDateTimeRange(weekDateRange);
-
-                            if (occursDuring) {
-                              final multiDayEventGroup = MultiDayEventGroup.fromEvents(
-                                events: [selectedEvent],
+                              final start = visibleDateRange.start.add(
+                                Duration(days: c * 7),
                               );
 
-                              return MultiDayEventGroupWidget<T>(
+                              // Calculate the end date.
+                              final end = visibleDateRange.start.add(
+                                Duration(days: (c * 7) + 7),
+                              );
+
+                              // Create a date range from the start and end dates.
+                              final weekDateRange = DateTimeRange(
+                                start: start.startOfDay,
+                                end: end.startOfDay,
+                              );
+
+                              // Get the events from the events controller.
+                              final events = scope.eventsController.getEventsFromDateRange(
+                                weekDateRange,
+                              );
+
+                              controller.visibleEvents = controller.visibleEvents.followedBy(events);
+
+                              // Create a multi day event group from the events.
+                              final multiDayEventGroup = MultiDayEventGroup.fromEvents(
+                                events: events,
+                              );
+
+                              final selectedEvent = scope.eventsController.selectedEvent;
+                              final horizontalStepDuration = viewConfiguration.horizontalStepDuration;
+                              final verticalStepDuration = viewConfiguration.verticalStepDuration;
+                              final multiDayTileHeight = viewConfiguration.multiDayTileHeight;
+
+                              // Calculate the height of the multi day event group.
+                              var height =
+                                  multiDayTileHeight * (multiDayEventGroup.maxNumberOfStackedEvents + (viewConfiguration.createMultiDayEvents ? 1 : 0));
+                              if (events.isEmpty) {
+                                // No events in a given week.
+                                height = 40;
+                              }
+
+                              final gestureDetector = MultiDayHeaderGestureDetector<T>(
+                                createMultiDayEvents: viewConfiguration.createMultiDayEvents,
+                                createEventTrigger: viewConfiguration.createEventTrigger,
+                                visibleDateRange: weekDateRange,
+                                horizontalStep: horizontalStep,
+                                verticalStep: verticalStep,
+                              );
+
+                              final eventGroup = MultiDayEventGroupWidget<T>(
                                 multiDayEventGroup: multiDayEventGroup,
                                 visibleDateRange: weekDateRange,
                                 horizontalStep: horizontalStep,
                                 horizontalStepDuration: horizontalStepDuration,
                                 verticalStep: verticalStep,
                                 verticalStepDuration: verticalStepDuration,
-                                isChanging: true,
+                                isChanging: false,
                                 multiDayTileHeight: multiDayTileHeight,
                                 rescheduleDateRange: visibleDateRange,
                               );
-                            } else {
-                              return const SizedBox.shrink();
-                            }
-                          },
-                        );
-                      }
 
-                      final style = CalendarStyleProvider.of(context).style.monthGridStyle;
-                      final color = style.color ?? Colors.white10;
-
-                      return DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: isFirstWeek ? BorderSide(color: color) : BorderSide.none,
-                            bottom: BorderSide(color: color),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            cellHeaders,
-                            SizedBox(
-                              height: height,
-                              child: Stack(
-                                children: [
-                                  gestureDetector,
-                                  eventGroup,
-                                  changingEvent ?? const SizedBox.shrink(),
+                              final cellHeaders = Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: <Widget>[
+                                  for (int r = 0; r < 7; r++)
+                                    components.monthCellHeaderBuilder(
+                                      visibleDateRange.start.add(
+                                        Duration(days: (c * 7) + r),
+                                      ),
+                                      (date) => scope.functions.onDateTapped?.call(date),
+                                    ),
                                 ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-              ],
+                              );
+
+                              ListenableBuilder? changingEvent;
+                              if (selectedEvent != null && scope.eventsController.hasChangingEvent) {
+                                changingEvent = ListenableBuilder(
+                                  listenable: scope.eventsController.selectedEvent!,
+                                  builder: (context, child) {
+                                    final occursDuring = selectedEvent.occursDuringDateTimeRange(weekDateRange);
+
+                                    if (occursDuring) {
+                                      final multiDayEventGroup = MultiDayEventGroup.fromEvents(
+                                        events: [selectedEvent],
+                                      );
+
+                                      return MultiDayEventGroupWidget<T>(
+                                        multiDayEventGroup: multiDayEventGroup,
+                                        visibleDateRange: weekDateRange,
+                                        horizontalStep: horizontalStep,
+                                        horizontalStepDuration: horizontalStepDuration,
+                                        verticalStep: verticalStep,
+                                        verticalStepDuration: verticalStepDuration,
+                                        isChanging: true,
+                                        multiDayTileHeight: multiDayTileHeight,
+                                        rescheduleDateRange: visibleDateRange,
+                                      );
+                                    } else {
+                                      return const SizedBox.shrink();
+                                    }
+                                  },
+                                );
+                              }
+
+                              final style = CalendarStyleProvider.of(context).style.monthGridStyle;
+                              final color = style.color ?? Colors.white10;
+
+                              return DecoratedBox(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: isFirstWeek ? BorderSide(color: color) : BorderSide.none,
+                                    bottom: BorderSide(color: color),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    cellHeaders,
+                                    SizedBox(
+                                      height: height,
+                                      child: Stack(
+                                        children: [
+                                          gestureDetector,
+                                          eventGroup,
+                                          changingEvent ?? const SizedBox.shrink(),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         ),

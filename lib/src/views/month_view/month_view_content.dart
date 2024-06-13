@@ -36,8 +36,7 @@ class MonthViewContent<T> extends StatelessWidget {
               controller: state.pageController,
               itemCount: state.numberOfPages,
               onPageChanged: (index) {
-                final newVisibleDateTimeRange =
-                    viewConfiguration.calculateVisibleDateRangeForIndex(
+                final newVisibleDateTimeRange = viewConfiguration.calculateVisibleDateRangeForIndex(
                   index: index,
                   calendarStart: scope.state.adjustedDateTimeRange.start,
                 );
@@ -46,8 +45,7 @@ class MonthViewContent<T> extends StatelessWidget {
                 scope.state.visibleDateTimeRange = newVisibleDateTimeRange;
 
                 // Update the selected date.
-                controller.selectedDate =
-                    newVisibleDateTimeRange.centerDateTime;
+                controller.selectedDate = newVisibleDateTimeRange.centerDateTime;
 
                 // Call the onPageChanged function.
                 scope.functions.onPageChanged?.call(
@@ -55,8 +53,7 @@ class MonthViewContent<T> extends StatelessWidget {
                 );
               },
               itemBuilder: (context, index) {
-                final visibleDateRange =
-                    viewConfiguration.calculateVisibleDateRangeForIndex(
+                final visibleDateRange = viewConfiguration.calculateVisibleDateRangeForIndex(
                   index: index,
                   calendarStart: scope.state.adjustedDateTimeRange.start,
                 );

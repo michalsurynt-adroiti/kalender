@@ -61,8 +61,7 @@ class MonthView<T> extends StatefulWidget {
   State<MonthView<T>> createState() => _MonthViewState<T>();
 }
 
-class _MonthViewState<T> extends State<MonthView<T>>
-    with SingleTickerProviderStateMixin {
+class _MonthViewState<T> extends State<MonthView<T>> with SingleTickerProviderStateMixin {
   late MonthViewState _viewState;
 
   @override
@@ -92,9 +91,9 @@ class _MonthViewState<T> extends State<MonthView<T>>
               multiDayEventTileBuilder: widget.multiDayEventTileBuilder,
             ),
             platformData: PlatformData(),
-            layoutDelegates:
-                widget.layoutDelegates ?? CalendarLayoutDelegates(),
+            layoutDelegates: widget.layoutDelegates ?? CalendarLayoutDelegates(),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 MonthViewHeader<T>(
                   viewConfiguration: widget.monthViewConfiguration,
