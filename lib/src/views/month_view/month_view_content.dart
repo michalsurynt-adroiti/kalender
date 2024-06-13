@@ -31,6 +31,7 @@ class MonthViewContent<T> extends StatelessWidget {
             width: constraints.maxWidth,
             height: constraints.maxHeight,
             child: PageView.builder(
+              physics: const NeverScrollableScrollPhysics(),
               key: Key(viewConfiguration.hashCode.toString()),
               controller: state.pageController,
               itemCount: state.numberOfPages,
