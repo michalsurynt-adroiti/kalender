@@ -110,14 +110,15 @@ class MonthViewPageContent<T> extends StatelessWidget {
                               );
 
                               final cellHeaders = Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: <Widget>[
                                   for (int r = 0; r < 7; r++)
-                                    components.monthCellHeaderBuilder(
-                                      visibleDateRange.start.add(
-                                        Duration(days: (c * 7) + r),
+                                    Expanded(
+                                      child: components.monthCellHeaderBuilder(
+                                        visibleDateRange.start.add(
+                                          Duration(days: (c * 7) + r),
+                                        ),
+                                        (date) => scope.functions.onDateTapped?.call(date),
                                       ),
-                                      (date) => scope.functions.onDateTapped?.call(date),
                                     ),
                                 ],
                               );

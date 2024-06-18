@@ -121,9 +121,14 @@ class _MyHomePageState extends State<MyHomePage> {
         monthCellHeaderBuilder: (date, onTapped) {
           if (controller.visibleMonth case final month?) {
             if (month.month == date.month && month.year == date.year) {
-              return Text(
-                date.day.toString(),
-                style: const TextStyle(color: Colors.yellow),
+              return Row(
+                children: [
+                  Spacer(),
+                  Text(
+                    date.day.toString(),
+                    style: const TextStyle(color: Colors.yellow),
+                  ),
+                ],
               );
             }
           }
