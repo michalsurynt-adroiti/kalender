@@ -42,7 +42,7 @@ class MonthViewPageContent<T> extends StatelessWidget {
                     components.monthGridBuilder(),
                     Column(
                       children: [
-                        for (int c = 0; c < 5; c++)
+                        for (int c = 0; c < 6; c++)
                           Builder(
                             builder: (context) {
                               // Calculate the start date.
