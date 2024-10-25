@@ -123,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
             if (month.month == date.month && month.year == date.year) {
               return Row(
                 children: [
-                  Spacer(),
+                  const Spacer(),
                   Text(
                     date.day.toString(),
                     style: const TextStyle(color: Colors.yellow),
