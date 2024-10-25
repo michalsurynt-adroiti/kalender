@@ -33,8 +33,7 @@ class MonthViewHeader<T> extends StatelessWidget {
               ...List<Widget>.generate(
                 7,
                 (index) => components.monthHeaderBuilder(
-                  value.start.add(Duration(days: index)),
-                ),
+                  value.start.addDays(index),                ),
               ),
             ],
           );

@@ -87,8 +87,8 @@ class MultipleDayHeader<T> extends StatelessWidget {
         ...List.generate(
           viewConfiguration.numberOfDays,
           (index) => components.dayHeaderBuilder(
-            visibleDateTimeRange.start.add(Duration(days: index)),
-            (date) => scope.functions.onDateTapped?.call(date),
+            visibleDateTimeRange.start.addDays(index),
+                        (date) => scope.functions.onDateTapped?.call(date),
           ),
         ),
       ],

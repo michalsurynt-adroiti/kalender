@@ -49,14 +49,10 @@ class MonthViewPageContent<T> extends StatelessWidget {
                               final isFirstWeek = c == 0;
                               //controller.visibleMonth
 
-                              final start = visibleDateRange.start.add(
-                                Duration(days: c * 7),
-                              );
+                              final start = visibleDateRange.start.addDays(c * 7);
 
                               // Calculate the end date.
-                              final end = visibleDateRange.start.add(
-                                Duration(days: (c * 7) + 7),
-                              );
+                              final end = visibleDateRange.start.addDays((c * 7) + 7);
 
                               // Create a date range from the start and end dates.
                               final weekDateRange = DateTimeRange(
@@ -114,9 +110,7 @@ class MonthViewPageContent<T> extends StatelessWidget {
                                   for (int r = 0; r < 7; r++)
                                     Expanded(
                                       child: components.monthCellHeaderBuilder(
-                                        visibleDateRange.start.add(
-                                          Duration(days: (c * 7) + r),
-                                        ),
+                                                                     visibleDateRange.start.addDays((c * 7) + r),
                                         (date) => scope.functions.onDateTapped?.call(date),
                                       ),
                                     ),
