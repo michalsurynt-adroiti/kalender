@@ -24,29 +24,30 @@ extension DateTimeRangeExtensions on DateTimeRange {
     // Check if the start and end is equal.
     if (start == end) return [start.startOfDay];
 
-    final localStartOfDate = start.startOfDay;
-    final utcStartOfDate = localStartOfDate.toUtc();
+    // Create a normalized start date at midnight
+    final startDate = DateTime(start.year, start.month, start.day);
 
-    final localEndOfDate = end.startOfDay;
-    // Check if the local end date is the startOfDay.
-    final isLocalEndOfDateStartOfDay = localEndOfDate.toUtc() == end.toUtc();
+    // Create a normalized end date
+    // If end time is exactly midnight (0:00), use the previous day
+    final endDate = end.hour == 0 && end.minute == 0 && end.second == 0 && end.millisecond == 0
+        ? DateTime(end.year, end.month, end.day - 1)
+        : DateTime(end.year, end.month, end.day);
 
-    // If the localEndDate is the startOfDay
-    //   Use the localEndOfDate in utc.
-    // else
-    //   Use the localEndOfDate endOfDay in utc.
-    final utcEndOfDate = isLocalEndOfDateStartOfDay
-        ? localEndOfDate.toUtc()
-        : localEndOfDate.endOfDay.toUtc();
+    // Calculate days between the two dates
+    final days = <DateTime>[];
 
-    // Calculate the dayDifference.
-    final dayDifference = utcEndOfDate.difference(utcStartOfDate).inDays;
+    // Current date for iteration
+    var currentDate = startDate;
 
-    final dates = <DateTime>[];
-    for (var i = 0; i < dayDifference; i++) {
-      dates.add(localStartOfDate.addDays(i));    }
+    // Add dates until we reach the end date
+    while (currentDate.isSameDay(endDate) || currentDate.isBefore(endDate)) {
+      days.add(currentDate);
+      // Use DateTime constructor to avoid DST issues
+      currentDate = DateTime(currentDate.year, currentDate.month, currentDate.day + 1);
+    }
 
-    return dates.toSet().toList();  }
+    return days;
+  }
 
   /// The number of years spanned by the [DateTimeRange].
   int get numberOfYears => end.year - start.year;
@@ -57,8 +58,8 @@ extension DateTimeRangeExtensions on DateTimeRange {
   }
 
   /// The center [DateTime] of the [DateTimeRange].
-  DateTime get centerDateTime =>
-      start.addDays((dayDifference / 2).floor());
+  DateTime get centerDateTime => start.addDays((dayDifference / 2).floor());
+
   /// The visible month of the [DateTimeRange].
   DateTime get visibleMonth {
     return DateTime(centerDateTime.year, centerDateTime.month);
@@ -87,8 +88,7 @@ extension DateTimeRangeExtensions on DateTimeRange {
 
     // This is custom so that if the user sets firstDayOfWeek to
     // monday, sunday or saturday we only show one week number.
-    final showOnlyOneWeekNumber = isSingleWeek &&
-        (start.weekday == 1 || start.weekday == 6 || start.weekday == 7);
+    final showOnlyOneWeekNumber = isSingleWeek && (start.weekday == 1 || start.weekday == 6 || start.weekday == 7);
 
     if (!showOnlyOneWeekNumber) {
       if (datesSpanned.first.weekNumber == datesSpanned.last.weekNumber) {
@@ -197,12 +197,10 @@ extension DateTimeExtensions on DateTime {
       );
 
   /// Checks if the [DateTime] is the same day as the calling object.
-  bool isSameDay(DateTime date) =>
-      year == date.year && month == date.month && day == date.day;
+  bool isSameDay(DateTime date) => year == date.year && month == date.month && day == date.day;
 
   /// Checks if the [DateTime] is within the [DateTimeRange].
-  bool isWithin(DateTimeRange range) =>
-      isAfter(range.start) && isBefore(range.end);
+  bool isWithin(DateTimeRange range) => isAfter(range.start) && isBefore(range.end);
 
   /// Checks if the [DateTime] is today.
   bool get isToday => isSameDay(DateTime.now());
@@ -220,9 +218,7 @@ extension DateTimeExtensions on DateTime {
     }
 
     // If the week number equals 53, one must check that the date is not actually in week 1 of the following year
-    if (woy == 53 &&
-        DateTime(year, 1, 1).weekday != DateTime.thursday &&
-        DateTime(year, 12, 31).weekday != DateTime.thursday) {
+    if (woy == 53 && DateTime(year, 1, 1).weekday != DateTime.thursday && DateTime(year, 12, 31).weekday != DateTime.thursday) {
       return 1;
     }
 

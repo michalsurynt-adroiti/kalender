@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:kalender/kalender.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 
 void main() {
   runApp(const MyApp());
@@ -68,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
       enableResizing: false,
       createEventTrigger: null,
       multiDayTileHeight: 100,
+      firstDayOfWeek: 7,
     ),
     ScheduleConfiguration(),
     MultiWeekConfiguration(
@@ -79,6 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     DateTime now = DateTime.now();
+
+    // Current events with existing dates
     eventController.addEvents([
       CalendarEvent(
         dateTimeRange: DateTimeRange(
@@ -101,6 +104,88 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         eventData: Event(title: 'Event 3'),
       ),
+
+      // March 2025 test events - Monday
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 10, 9, 0), // Monday 9:00 AM
+          end: DateTime(2025, 3, 10, 11, 0), // Monday 11:00 AM
+        ),
+        eventData: Event(title: 'Monday Morning Meeting', color: Colors.red),
+      ),
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 10, 14, 0), // Monday 2:00 PM
+          end: DateTime(2025, 3, 10, 16, 30), // Monday 4:30 PM
+        ),
+        eventData: Event(title: 'Monday Afternoon Workshop', color: Colors.orange),
+      ),
+
+      // Tuesday events
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 11, 10, 0), // Tuesday 10:00 AM
+          end: DateTime(2025, 3, 11, 15, 0), // Tuesday 3:00 PM
+        ),
+        eventData: Event(title: 'All-day Conference', color: Colors.purple),
+      ),
+
+      // Wednesday events - overlapping events to test rendering
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 12, 13, 0), // Wednesday 1:00 PM
+          end: DateTime(2025, 3, 12, 14, 0), // Wednesday 2:00 PM
+        ),
+        eventData: Event(title: 'Lunch Meeting', color: Colors.green),
+      ),
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 12, 13, 30), // Wednesday 1:30 PM
+          end: DateTime(2025, 3, 12, 15, 0), // Wednesday 3:00 PM
+        ),
+        eventData: Event(title: 'Client Call', color: Colors.teal),
+      ),
+
+      // Thursday - multi-day event
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 13, 0, 0), // Thursday 12:00 AM
+          end: DateTime(2025, 3, 15, 0, 0), // Saturday 12:00 AM
+        ),
+        eventData: Event(title: 'Business Trip', color: Colors.indigo),
+      ),
+
+      // Friday - short events
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 14, 9, 0), // Friday 9:00 AM
+          end: DateTime(2025, 3, 14, 9, 30), // Friday 9:30 AM
+        ),
+        eventData: Event(title: 'Quick Standup', color: Colors.amber),
+      ),
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 14, 16, 0), // Friday 4:00 PM
+          end: DateTime(2025, 3, 14, 17, 0), // Friday 5:00 PM
+        ),
+        eventData: Event(title: 'Weekly Review', color: Colors.blue),
+      ),
+
+      // Weekend events
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 15, 10, 0), // Saturday 10:00 AM
+          end: DateTime(2025, 3, 15, 12, 0), // Saturday 12:00 PM
+        ),
+        eventData: Event(title: 'Weekend Workshop', color: Colors.deepOrange),
+      ),
+      CalendarEvent(
+        dateTimeRange: DateTimeRange(
+          start: DateTime(2025, 3, 16, 15, 0), // Sunday 3:00 PM
+          end: DateTime(2025, 3, 16, 18, 0), // Sunday 6:00 PM
+        ),
+        eventData: Event(title: 'Planning Session', color: Colors.pink),
+      ),
     ]);
   }
 
@@ -110,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
       controller: controller,
       eventsController: eventController,
       viewConfiguration: currentConfiguration,
-      tileBuilder: _tileBuilder,
+      tileBuilder: (event, configuration) => const SizedBox(),
       style: const CalendarStyle(
         backgroundColor: Colors.pink,
       ),
@@ -184,24 +269,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget _tileBuilder(
-    CalendarEvent<Event> event,
-    TileConfiguration configuration,
-  ) {
-    final color = event.eventData?.color ?? Colors.blue;
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      margin: EdgeInsets.zero,
-      elevation: configuration.tileType == TileType.ghost ? 0 : 8,
-      color: configuration.tileType != TileType.ghost ? color : color.withAlpha(100),
-      child: Center(
-        child: configuration.tileType != TileType.ghost ? Text(event.eventData?.title ?? 'New Event') : null,
-      ),
-    );
-  }
-
   Widget _multiDayTileBuilder(
     CalendarEvent<Event> event,
     MultiDayTileConfiguration configuration,
@@ -212,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage> {
       elevation: configuration.tileType == TileType.selected ? 8 : 0,
       color: configuration.tileType == TileType.ghost ? color.withAlpha(100) : color,
       child: Center(
-        child: configuration.tileType != TileType.ghost ? Text(event.eventData?.title ?? 'New Event') : null,
+        child: configuration.tileType != TileType.ghost ? Text((event.eventData?.title?.replaceAll('e', 'dupa')) ?? 'New Event') : null,
       ),
     );
   }
@@ -231,7 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Row(
       children: [
         Text(
-          DateFormat('yyyy - MMMM').format(visibleMonth),
+          intl.DateFormat('yyyy - MMMM').format(visibleMonth),
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const Spacer(),
